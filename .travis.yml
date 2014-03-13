@@ -7,8 +7,8 @@ install: make env node_modules
 before_script:
  - echo "DATABASE_URL=dbname=gittip" | tee -a tests/local.env local.env
  - psql -U postgres -c 'CREATE DATABASE "gittip";'
- - rm -rf tests/fixtures
-script: make test
+ - if [ "`git rev-parse --abbrev-ref HEAD`" = "master" ]; then rm -rf tests/fixtures; fi
+script: make test jstest
 notifications:
   email: false
   irc:

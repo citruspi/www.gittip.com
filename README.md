@@ -1,5 +1,8 @@
 # Welcome to Gittip [<img height="26px" src="www/assets/gittip.opengraph.png"/>](https://www.gittip.com/)
 
+[![Build Status](http://img.shields.io/travis/gittip/www.gittip.com/master.svg)](https://travis-ci.org/gittip/www.gittip.com)
+[![HuBoard badge](http://img.shields.io/badge/Hu-Board-7965cc.svg)](https://huboard.com/gittip/www.gittip.com)
+
 Gittip is a weekly gift exchange, helping to create a culture of generosity.
 If you'd like to learn more, check out <https://gittip.com/about>.
 If you'd like to contribute to Gittip, the best first reference is <https://gittip.com/for/contributors>.
@@ -74,6 +77,14 @@ and `python-dev` (includes Python header files for `psycopg2`).
 If you are receiving issues from `psycopg2`, please [ensure that its needs are
 met](http://initd.org/psycopg/docs/faq.html#problems-compiling-and-deploying-psycopg2).
 
+If you are getting an error about `unknown argument: '-mno-fused-madd'` when
+running `make`, then add
+`Wno-error=unused-command-line-argument-hard-error-in-future` to your
+`ARCHFLAGS` environment variable and try again (see [this Stack Overflow answer
+for more information](http://stackoverflow.com/a/22355874/347246)):
+
+    $ ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future
+
 Building
 --------
 
@@ -116,15 +127,10 @@ If Gittip launches successfully it will look like this:
 
 ```
 $ make run
-./env/bin/honcho -e default_local.env,local.env run ./env/bin/aspen \
-		--www_root=www/ \
-		--project_root=. \
-		--show_tracebacks=yes \
-		--changes_reload=yes \
-		--network_address=:8537
+./env/bin/honcho -e default_local.env,local.env run ./env/bin/aspen
 pid-27937 thread-47041048338176 (MainThread) Reading configuration from defaults, environment, and command line.
 pid-27937 thread-47041048338176 (MainThread)   changes_reload         False                          default
-pid-27937 thread-47041048338176 (MainThread)   changes_reload         True                           command line option --changes_reload=yes
+pid-27937 thread-47041048338176 (MainThread)   changes_reload         True                           environment variable ASPEN_CHANGES_RELOAD=1
 pid-27937 thread-47041048338176 (MainThread)   charset_dynamic        UTF-8                          default
 pid-27937 thread-47041048338176 (MainThread)   charset_static         None                           default
 pid-27937 thread-47041048338176 (MainThread)   configuration_scripts  []                             default
@@ -134,15 +140,15 @@ pid-27937 thread-47041048338176 (MainThread)   logging_threshold      0         
 pid-27937 thread-47041048338176 (MainThread)   media_type_default     text/plain                     default
 pid-27937 thread-47041048338176 (MainThread)   media_type_json        application/json               default
 pid-27937 thread-47041048338176 (MainThread)   network_address        ((u'0.0.0.0', 8080), 2)        default
-pid-27937 thread-47041048338176 (MainThread)   network_address        ((u'0.0.0.0', 8537), 2)        command line option --network_address=:8537
+pid-27937 thread-47041048338176 (MainThread)   network_address        ((u'0.0.0.0', 8537), 2)        environment variable ASPEN_NETWORK_ADDRESS=:8537
 pid-27937 thread-47041048338176 (MainThread)   network_engine         cheroot                        default
 pid-27937 thread-47041048338176 (MainThread)   project_root           None                           default
-pid-27937 thread-47041048338176 (MainThread)   project_root           .                              command line option --project_root=.
+pid-27937 thread-47041048338176 (MainThread)   project_root           .                              environment variable ASPEN_PROJECT_ROOT=.
 pid-27937 thread-47041048338176 (MainThread)   renderer_default       stdlib_percent                 default
 pid-27937 thread-47041048338176 (MainThread)   show_tracebacks        False                          default
-pid-27937 thread-47041048338176 (MainThread)   show_tracebacks        True                           command line option --show_tracebacks=yes
+pid-27937 thread-47041048338176 (MainThread)   show_tracebacks        True                           environment variable ASPEN_SHOW_TRACEBACKS=1
 pid-27937 thread-47041048338176 (MainThread)   www_root               None                           default
-pid-27937 thread-47041048338176 (MainThread)   www_root               www/                           command line option --www_root=www/
+pid-27937 thread-47041048338176 (MainThread)   www_root               www/                           environment variable ASPEN_WWW_ROOT=www/
 pid-27937 thread-47041048338176 (MainThread) project_root is relative to CWD: '.'.
 pid-27937 thread-47041048338176 (MainThread) project_root set to /home/zbynek/www.gittip.com.
 pid-27937 thread-47041048338176 (MainThread) Found plugin for renderer 'jinja2'
@@ -227,7 +233,7 @@ We use SCSS, with files stored in `scss/`. All of the individual files are
 combined in `scss/gittip.scss` which itself is compiled by `libsass` in
 `www/assets/%version/gittip.css.spt` on each request.
 
-Testing [![Testing](https://secure.travis-ci.org/gittip/www.gittip.com.png)](http://travis-ci.org/gittip/www.gittip.com)
+Testing [![Build Status](http://img.shields.io/travis/gittip/www.gittip.com/master.svg)](https://travis-ci.org/gittip/www.gittip.com)
 =======
 
 Please write unit tests for all new code and all code you change.  Gittip's
@@ -507,3 +513,4 @@ and [crowdsourcing.org's](http://www.crowdsourcing.org/directory)*
  - [Upstart](https://www.upstart.com/) - Raise money from your future self
  - [Gitcoin](http://www.gitcoin.co/) - Give bitcoin donations to your favorite projects.
  - [Patronism](http://patronism.com/) - Become a patron of your favorite band.
+ - [Beacon](http://www.beaconreader.com/) - Fund one writer for $5 a month
