@@ -1,13 +1,21 @@
 {% from 'templates/auth.html' import auth_button with context %}
 {% from 'templates/account-row.html' import account_row with context %}
 
-<h2>Connected Accounts</h2>
-<table id="accounts">
+<h2>Social Profiles</h2>
+<table class="accounts">
 
     <!-- social profiles -->
     {% for platform in website.social_profiles %}
     {{ account_row(platform, accounts, auth_button) }}
     {% endfor %}
+</table>
+
+{% if not user.ANON and user.participant == participant %}
+<h2>Other Receiving Options</h2>
+{% else %}
+<h2>Other Giving Options</h2>
+{% endif %}
+<table class="accounts">
 
     <!-- one-off receiving options -->
     <tr>
@@ -15,32 +23,24 @@
             <img src="/assets/bitcoin.png" />
         </td>
         <td class="account-details">
-
+            <div class="account-type">Bitcoin</div>
             {% if not user.ANON and user.participant == participant %}
                 <div class="bitcoin">
             {% else %}
                 <div>
             {% endif %}
                 {% if participant.bitcoin_address %}
-                    <a rel="me" href="http://blockchain.info/address/{{ participant.bitcoin_address }}">
+                    <a class="address" rel="me" href="http://blockchain.info/address/{{ participant.bitcoin_address }}">
                       {{ participant.bitcoin_address }}
                     </a>
                     {% if not user.ANON and user.participant == participant %}
-                    <div class="edit-bitcoin">
-                        (<a href="javascript:;" class="toggle-bitcoin">Edit</a>) Bitcoin address
-                    </div>
-                    {% else %}
-                    <div class="account-type">
-                        Bitcoin address
-                    </div>
-
+                    <button class="toggle-bitcoin">Edit</button>
                     {% endif %}
 
                 {% else %}
+                    <span class="none">None</span>
                     {% if not user.ANON and user.participant == participant %}
-                        Add a <a href="javascript:;" class="toggle-bitcoin">Bitcoin address</a>.
-                    {% else %}
-                        No Bitcoin receiving address.
+                        <button class="toggle-bitcoin">+ Add</button>
                     {% endif %}
                 {% endif %}
             </div>
@@ -60,6 +60,10 @@
         </td>
     </tr>
     {{ account_row(website.platforms.venmo, accounts, auth_button) }}
+</table>
+
+<h2>Moving Money Every Week</h2>
+<table class="accounts">
 
     <!-- add/withdraw money (recurring) -->
     <tr>
@@ -67,6 +71,13 @@
             <img src="/assets/balanced-avatar.png" />
         </td>
         <td class="account-details">
+            <div class="account-type">
+                Balanced Payments
+                {% if user.ADMIN and participant.balanced_customer_href %}
+                (<a href="https://dashboard.balancedpayments.com/#/{{ participant.balanced_customer_href[4:] }}"
+                    >view on dashboard</a>)
+                {% endif %}
+            </div>
             {% if user.participant == participant %}
 
             <a href="/credit-card.html">Credit card</a>:
@@ -88,9 +99,6 @@
             <span>{% if participant.last_ach_result != "" %}&#x2718;{% else %}&#x2714;{% endif %}</span>
 
             {% endif %}
-            <div class="account-type">{% if user.ADMIN and participant.balanced_customer_href %}
-                <a href="https://dashboard.balancedpayments.com/#/{{ participant.balanced_customer_href[4:] }}"
-                    >on Balanced Payments</a>{% else %}on Balanced Payments{% endif %}</div>
         </td>
     </tr>
 </table>
