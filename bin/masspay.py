@@ -65,7 +65,7 @@ class Payee(object):
         fee = min(fee, D('20.00'))                          # capped at $20
         self.fee += fee                                     #  XXX or $1 for U.S. :/
         self.net -= fee                                     #  XXX See #1675.
-        if self.net % 1 == D('0.25'):
+        if self.net % D('0.01') >= D('0.005'):
 
             # Prevent an escrow leak. It's complicated, but it goes something
             # like this:
