@@ -448,7 +448,7 @@ def log_cursor(f):
 
 
 def get_avatar_url(obj):
-    if not obj.avatar_url:
+    if obj is None or not obj.avatar_url:
         return '/assets/-/avatar-default.png'
     return obj.avatar_url
 
