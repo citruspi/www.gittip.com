@@ -8,19 +8,19 @@ import traceback
 
 import gittip
 import gittip.wireup
-from gittip import canonize, configure_payments
+from gittip import canonize
 from gittip.security import authentication, csrf, x_frame_options
 from gittip.utils import cache_static, timer
 
 
 from aspen import log_dammit
 
+
 # Wireup Algorithm
 # ================
 
 version_file = os.path.join(website.www_root, 'version.txt')
-__version__ = open(version_file).read().strip()
-website.version = os.environ['__VERSION__'] = __version__
+website.version = open(version_file).read().strip()
 
 
 website.renderer_default = "jinja2"
@@ -36,18 +36,20 @@ website.renderer_factories['jinja2'].Renderer.global_context = {
 }
 
 
-gittip.wireup.canonical()
-website.db = gittip.wireup.db()
-gittip.wireup.billing()
+env = website.env = gittip.wireup.env()
+gittip.wireup.canonical(env)
+website.db = gittip.wireup.db(env)
+gittip.wireup.billing(env)
 gittip.wireup.username_restrictions(website)
-gittip.wireup.nanswers()
-gittip.wireup.envvars(website)
+gittip.wireup.nanswers(env)
+gittip.wireup.accounts_elsewhere(website, env)
+gittip.wireup.other_stuff(website, env)
 tell_sentry = gittip.wireup.make_sentry_teller(website)
 
 # The homepage wants expensive queries. Let's periodically select into an
 # intermediate table.
 
-UPDATE_HOMEPAGE_EVERY = int(os.environ['UPDATE_HOMEPAGE_EVERY'])
+UPDATE_HOMEPAGE_EVERY = env.update_homepage_every
 def update_homepage_queries():
     from gittip import utils
     while 1:
@@ -143,7 +145,6 @@ algorithm.functions = [ timer.start
                       , algorithm['raise_200_for_OPTIONS']
 
                       , canonize
-                      , configure_payments
                       , authentication.inbound
                       , csrf.inbound
                       , add_stuff_to_context

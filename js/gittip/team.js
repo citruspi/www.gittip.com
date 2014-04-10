@@ -1,8 +1,20 @@
 Gittip.team = (function() {
     function init() {
+        var $team = $('#team');
+
+        var $indicator = $('<div class="loading-indicator"/>');
+        $indicator.appendTo($('#page'));
+
         $('#lookup-container form').submit(add);
         $('#query').focus().keyup(lookup);
-        jQuery.get("index.json").success(drawRows);
+
+        $team.css('opacity', 0);
+
+        jQuery.get("index.json").success(function(members) {
+            $team.css('opacity', 1);
+            $indicator.remove();
+            drawRows(members);
+        });
     }
 
 
@@ -112,7 +124,7 @@ Gittip.team = (function() {
         e.preventDefault();
         e.stopPropagation();
         var query = $('#query').val();
-        setTake(query, '0.01', function() { alert('Member added!'); });
+        setTake(query, '0.01', function() { Gittip.notification('Member added!', 'success'); });
         $('#lookup-results').empty();
         $('#query').val('').focus();
         return false;
@@ -123,7 +135,7 @@ Gittip.team = (function() {
         e.stopPropagation();
         var membername = $(e.target).attr('data-username');
         if (confirm("Remove " + membername + " from this team?"))
-            setTake(membername, '0.00', function() { alert('Member removed!'); });
+            setTake(membername, '0.00', function() { Gittip.notification('Member removed!'); });
         return false;
     }
 
@@ -149,22 +161,30 @@ Gittip.team = (function() {
         var username = _.attr('data-username'),
                 take = _.val();
         if (take.search(/^\d+\.?\d*$/) !== 0)
-            alert("Bad input! Must be a number.");
+            Gittip.notification("Bad input! Must be a number.", 'error');
         else
         {
             var callback = function(d) {
                 var newTake = $.grep(d, function(row) { return row.username == username })[0].take;
                 if ( take == newTake)
-                    alert('Updated your take!');
+                    Gittip.notification('Updated your take!', 'success');
                 else
-                    alert('You cannot exceed double of last week. Updated your take to ' + newTake + '.');
+                    Gittip.notification('You cannot exceed double of last week. Updated your take to ' + newTake + '.', 'error');
+
+                // Have a little fun if updating the user's take results in the team balance
+                // equaling $0.01 or $1.00
+                var balance = $('.figure.balance').last().text();
+                if (localStorage && !localStorage.lastSushi && (balance == '0.01' || balance == '1.00')) {
+                    Gittip.notification('Achievement Unlocked: The Last Sushi Roll', 'success');
+                    localStorage.lastSushi = true;
+                }
             };
             if (parseFloat(take) === 0) {
                 if (!confirm("Remove yourself from this team?")) {
                     resetTake();
                     return false;
                 }
-                callback = function() { alert('Removed!'); };
+                callback = function() { Gittip.notification('Removed!'); };
             }
             setTake(username, take, callback);
         }
@@ -182,11 +202,11 @@ Gittip.team = (function() {
                 { type: 'POST'
                 , url: username + ".json"
                 , data: {take: take}
-                , success: function(d) { callback(d); drawRows(d); }
+                , success: function(d) { drawRows(d); callback(d); }
                 , error: function(xhr) {
                         switch (xhr.status) {
-                            case 404: alert("Unknown user!"); break;
-                            default: alert("Problem! " + xhr.status);
+                            case 404: Gittip.notification("Unknown user!", 'error'); break;
+                            default: Gittip.notification("Problem! " + xhr.status, 'error');
                         }
                     }
                  });
